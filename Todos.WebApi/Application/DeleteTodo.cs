@@ -3,6 +3,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Todos.WebApi.Data;
+using Todos.WebApi.Domain;
 
 namespace Todos.WebApi.Application
 {
@@ -23,7 +24,17 @@ namespace Todos.WebApi.Application
             {
                 var todo = await context.Todos.FindAsync(new object[] { request.TodoId }, cancellationToken: cancellationToken);
 
+                var audit = new AuditEntry
+                {
+                    AuditEntryId = Guid.NewGuid(),
+                    AuditDate = DateTime.Now,
+                    Action = "DeleteTodo",
+                    TodoId = todo.TodoId,
+                    AuditInfo = todo.Text
+                };
+
                 context.Todos.Remove(todo);
+                await context.AuditEntries.AddAsync(audit, cancellationToken);
 
                 await context.SaveChangesAsync(cancellationToken);
 

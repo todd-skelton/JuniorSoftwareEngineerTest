@@ -31,7 +31,18 @@ namespace Todos.WebApi.Application
                     LastUpdated = DateTime.Now
                 };
 
+                var audit = new AuditEntry
+                {
+
+                    AuditEntryId = Guid.NewGuid(),
+                    AuditDate = DateTime.Now,
+                    Action = "CreateTodo",
+                    TodoId = todo.TodoId,
+                    AuditInfo = todo.Text
+                };
+
                 await context.Todos.AddAsync(todo, cancellationToken);
+                await context.AuditEntries.AddAsync(audit, cancellationToken);
                 await context.SaveChangesAsync(cancellationToken);
 
                 return Unit.Value;

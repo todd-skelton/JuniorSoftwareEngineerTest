@@ -4,6 +4,7 @@ import { Delete } from '@material-ui/icons';
 import React, { Fragment, useEffect, useState } from 'react';
 import { createTodo } from './api/create-todo';
 import { deleteTodo } from './api/delete-todo';
+import { AuditEntry, getAuditLog } from './api/get-audit-log';
 import { getTodos, Todo } from './api/get-todos';
 import { setTodoIsCompleted } from './api/set-todo-is-completed';
 
@@ -11,14 +12,22 @@ const App = () => {
   const [tab, setTab] = useState(0);
   const [text, setText] = useState("");
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
 
   useEffect(() => {
     updateTodos();
+    updateAuditLog();
   }, []);
+
 
   const updateTodos = async () => {
     const response = await getTodos();
     setTodos(response.todos);
+  }
+
+  const updateAuditLog = async () => {
+    const response = await getAuditLog();
+    setAuditLog(response.auditLog);
   }
 
   const handleTabChange = (_: React.ChangeEvent<{}>, newValue: number) => {
@@ -34,16 +43,19 @@ const App = () => {
     await createTodo({ text });
     setText("");
     await updateTodos();
+    await updateAuditLog();
   }
 
   const handleSetIsCompleted = (todoId: string, isCompleted: boolean) => async () => {
     await setTodoIsCompleted({ todoId, isCompleted });
     await updateTodos();
+    await updateAuditLog();
   }
 
   const handleDeleteTodo = (todoId: string) => async () => {
     await deleteTodo({ todoId });
     await updateTodos();
+    await updateAuditLog();
   }
 
   return (
@@ -104,6 +116,15 @@ const App = () => {
                     <Delete />
                   </IconButton>
                 </ListItemSecondaryAction>
+              </ListItem>
+            ))}
+          </List>
+        </div>
+        <div role="tabpanel" hidden={tab !== 1}>
+          <List>
+            {auditLog.map(auditEntry => (
+              <ListItem key={auditEntry.auditEntryId}>
+                <ListItemText primary={`TodoId: ${auditEntry.todoId} Action: ${auditEntry.action} AuditInfo: ${auditEntry.auditInfo}`} secondary={auditEntry.auditDate} />
               </ListItem>
             ))}
           </List>

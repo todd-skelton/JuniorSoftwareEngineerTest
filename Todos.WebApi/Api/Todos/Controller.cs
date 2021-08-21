@@ -17,9 +17,16 @@ namespace Todos.WebApi.Api.Todos
             this.mediator = mediator;
         }
 
+        [HttpGet]
         public async Task<GetTodos.Response> GetTodos()
         {
             return await mediator.Send(new GetTodos.Request());
+        }
+
+        [HttpGet("audit-log")]
+        public async Task<GetAuditLog.Response> GetAuditLog()
+        {
+            return await mediator.Send(new GetAuditLog.Request());
         }
 
         [HttpPost]

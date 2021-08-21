@@ -10,5 +10,6 @@ namespace Todos.WebApi.Data
         }
 
         public DbSet<Todo> Todos { get; set; }
+        public DbSet<AuditEntry> AuditEntries { get; set; }
     }
 }
